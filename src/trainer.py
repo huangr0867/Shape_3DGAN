@@ -75,7 +75,7 @@ def trainer(args):
 
     print(dsets_path)  # ../volumetric_data/chair/30/train/
 
-    train_dsets = ShapeNetDataset(dsets_path, args, "train")
+    train_dsets = ShapeDataset(dsets_path, args, "train")
     # val_dsets = ShapeNetDataset(dsets_path, args, "val")
 
     train_dset_loaders = torch.utils.data.DataLoader(train_dsets, batch_size=32, shuffle=True,
@@ -247,4 +247,4 @@ def trainer(args):
                 # print (samples.shape)
                 # image_saved_path = '../images'
 
-                SavePloat_Voxels(samples, image_saved_path, epoch)
+                saveGeneratedShape(samples, image_saved_path, epoch)

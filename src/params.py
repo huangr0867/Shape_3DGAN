@@ -25,7 +25,7 @@ bias = False
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 data_dir = '../sphere_data_r15_pts1000/'
 model_dir = 'sphere/'  # change it to train on other data models
-output_dir = '../data/sphere_outputs_r15_pts1000change1'
+output_dir = '../data/sphere_outputs_r15_pts1000change2'
 # images_dir = '../test_outputs'
 
 

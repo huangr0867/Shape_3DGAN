@@ -1,1 +1,1 @@
-# Shape_3DGAN
+# 3D-GAN for Shape Generation

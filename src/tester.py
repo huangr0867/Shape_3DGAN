@@ -95,6 +95,6 @@ def tester(args):
 
         # visualization
         if not args.use_visdom:
-            SavePloat_Voxels(samples, image_saved_path, 'tester_' + str(i))  # norm_
+            saveGeneratedShape(samples, image_saved_path, 'tester_' + str(i))  # norm_
         else:
             plotVoxelVisdom(samples[0, :], vis, "tester_" + str(i))
