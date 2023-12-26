@@ -18,7 +18,7 @@ import time
 from tensorboardX import SummaryWriter
 import matplotlib.pyplot as plt
 import numpy as np
-import params
+import constants
 from tqdm import tqdm
 
 
@@ -48,7 +48,7 @@ def save_val_log(writer, loss_D, loss_G, itr):
 
 def trainer(args):
     # added for output dir
-    save_file_path = params.output_dir + '/' + args.model_name
+    save_file_path = constants.DIR_OUT
     print(save_file_path)  # ../outputs/dcgan
     if not os.path.exists(save_file_path):
         os.makedirs(save_file_path)
@@ -56,11 +56,10 @@ def trainer(args):
     # for using tensorboard
     if args.logs:
         model_uid = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
-        # writer = SummaryWriter(params.output_dir+'/'+args.model_name+'/'+model_uid+'_'+args.logs+'/logs')
-        writer = SummaryWriter(params.output_dir + '/' + args.model_name + '/' + args.logs + '/logs')
+        writer = SummaryWriter(constants.DIR_OUT + '/' + args.logs + '/logs')
 
-        image_saved_path = params.output_dir + '/' + args.model_name + '/' + args.logs + '/images'
-        model_saved_path = params.output_dir + '/' + args.model_name + '/' + args.logs + '/models'
+        image_saved_path = constants.DIR_OUT + '/' + args.logs + '/images'
+        model_saved_path = constants.DIR_OUT + '/' + args.logs + '/models'
 
         if not os.path.exists(image_saved_path):
             os.makedirs(image_saved_path)
@@ -68,12 +67,9 @@ def trainer(args):
             os.makedirs(model_saved_path)
 
     # datset define
-    # dsets_path = args.input_dir + args.data_dir + "train/"
     dsets_path = '/Users/ryanhuang/Desktop/data/sphere_data_r15_pts1000/'
-    # if params.cube_len == 64:
-    #     dsets_path = params.data_dir + params.model_dir + "30/train64/"
 
-    print(dsets_path)  # ../volumetric_data/chair/30/train/
+    print(dsets_path)
 
     train_dsets = ShapeDataset(dsets_path, args, "train")
     # val_dsets = ShapeNetDataset(dsets_path, args, "val")
@@ -90,18 +86,12 @@ def trainer(args):
     D = Discriminator(args)
     G = Generator(args)
 
-    # print total number of parameters in a model
-    # x = sum(p.numel() for p in G.parameters() if p.requires_grad)
-    # print (x)
-    # x = sum(p.numel() for p in D.parameters() if p.requires_grad)
-    # print (x)
-
-    D_solver = optim.Adam(D.parameters(), lr=params.d_lr, betas=params.beta)
+    D_solver = optim.Adam(D.parameters(), lr=constants.D_LR, betas=constants.BETA)
     # D_solver = optim.SGD(D.parameters(), lr=args.d_lr, momentum=0.9)
-    G_solver = optim.Adam(G.parameters(), lr=params.g_lr, betas=params.beta)
+    G_solver = optim.Adam(G.parameters(), lr=constants.G_LR, betas=constants.BETA)
 
-    D.to(params.device)
-    G.to(params.device)
+    D.to(constants.DEVICE)
+    G.to(constants.DEVICE)
 
     # criterion_D = nn.BCELoss()
     criterion_D = nn.MSELoss()
@@ -111,7 +101,7 @@ def trainer(args):
     itr_val = -1
     itr_train = -1
 
-    for epoch in range(params.epochs):
+    for epoch in range(constants.EPOCHS):
 
         start = time.time()
 
@@ -137,7 +127,7 @@ def trainer(args):
                 if phase == 'train':
                     itr_train += 1
 
-                X = X.to(params.device)
+                X = X.to(constants.DEVICE)
                 # print (X)
                 # print (X.size())
 
@@ -153,15 +143,9 @@ def trainer(args):
                 fake = G(Z)
                 d_fake = D(fake)
 
-                real_labels = torch.ones_like(d_real).to(params.device)
-                fake_labels = torch.zeros_like(d_fake).to(params.device)
-                # print (d_fake.size(), fake_labels.size())
+                real_labels = torch.ones_like(d_real).to(constants.DEVICE)
+                fake_labels = torch.zeros_like(d_fake).to(constants.DEVICE)
 
-                if params.soft_label:
-                    real_labels = torch.Tensor(batch).uniform_(0.7, 1.2).to(params.device)
-                    fake_labels = torch.Tensor(batch).uniform_(0, 0.3).to(params.device)
-
-                # print (d_real.size(), real_labels.size())
                 d_real_loss = criterion_D(d_real, real_labels)
 
                 d_fake_loss = criterion_D(d_fake, fake_labels)
@@ -173,7 +157,7 @@ def trainer(args):
                 d_fake_acu = torch.le(d_fake.squeeze(), 0.5).float()
                 d_total_acu = torch.mean(torch.cat((d_real_acu, d_fake_acu), 0))
 
-                if d_total_acu < params.d_thresh:
+                if d_total_acu < constants.D_THRESHOLD:
                     D.zero_grad()
                     d_loss.backward()
                     D_solver.step()
@@ -189,13 +173,12 @@ def trainer(args):
                 adv_g_loss = criterion_D(d_fake, real_labels)
                 # print (fake.size(), X.size())
 
-                # recon_g_loss = criterion_D(fake, X)
+
                 recon_g_loss = criterion_G(fake, X)
-                # g_loss = recon_g_loss + params.adv_weight * adv_g_loss
+
                 g_loss = adv_g_loss
 
                 if args.local_test:
-                    # print('Iteration-{} , D(x) : {:.4} , G(x) : {:.4} , D(G(x)) : {:.4}'.format(itr_train, d_loss.item(), recon_g_loss.item(), adv_g_loss.item()))
                     print('Iteration-{} , D(x) : {:.4}, D(G(x)) : {:.4}'.format(itr_train, d_loss.item(),
                                                                                 adv_g_loss.item()))
 
@@ -238,7 +221,7 @@ def trainer(args):
             print('Epochs-{} ({}) , D(x) : {:.4}, D(G(x)) : {:.4}'.format(epoch, phase, epoch_loss_D, epoch_loss_adv_G))
             print('Elapsed Time: {:.4} min'.format(epoch_time / 60.0))
 
-            if (epoch + 1) % params.model_save_step == 0:
+            if (epoch + 1) % constants.SAVE_MODEL_ITER == 0:
                 print('model_saved, images_saved...')
                 torch.save(G.state_dict(), model_saved_path + '/G.pth')
                 torch.save(D.state_dict(), model_saved_path + '/D.pth')

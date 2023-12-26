@@ -9,7 +9,6 @@ from trainer import trainer
 import torch
 
 from tester import tester
-import params
 
 
 def str2bool(v):
@@ -35,7 +34,7 @@ def main():
     print(args)
 
     # list params
-    params.print_params()
+    # params.print_params()
 
     # run program
     if not args.test:

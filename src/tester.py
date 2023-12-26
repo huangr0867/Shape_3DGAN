@@ -14,11 +14,9 @@ from model import Generator, Discriminator
 # from lr_sh import  MultiStepLR
 
 # added
-import datetime
 from tensorboardX import SummaryWriter
 import matplotlib.pyplot as plt
 import numpy as np
-import params
 import visdom
 
 
@@ -37,16 +35,14 @@ import visdom
 def tester(args):
     print('Evaluation Mode...')
 
-    # image_saved_path = '../images'
-    # image_saved_path = params.images_dir
-    image_saved_path = params.output_dir + '/' + args.model_name + '/' + args.logs + '/test_outputs'
+    image_saved_path = constants.DIR_OUT + '/' + args.logs + '/test_outputs'
     if not os.path.exists(image_saved_path):
         os.makedirs(image_saved_path)
 
     if args.use_visdom:
         vis = visdom.Visdom()
 
-    save_file_path = params.output_dir + '/' + args.model_name
+    save_file_path = constants.DIR_OUT
     pretrained_file_path_G = save_file_path + '/' + args.logs + '/models/G.pth'
     pretrained_file_path_D = save_file_path + '/' + args.logs + '/models/D.pth'
 
@@ -66,8 +62,8 @@ def tester(args):
 
     # test generator
     # test_gen(args)
-    G.to(params.device)
-    D.to(params.device)
+    G.to(constants.DEVICE)
+    D.to(constants.DEVICE)
     G.eval()
     D.eval()
 
