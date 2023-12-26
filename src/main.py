@@ -11,10 +11,11 @@ import torch
 from tester import tester
 
 
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+def strBool(string):
+    string = string.lower()
+    if string in {'yes', 'true', 't', 'y', '1'}:
         return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+    elif string in {'no', 'false', 'f', 'n', '0'}:
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
@@ -26,10 +27,10 @@ def main():
 
     # loggings parameters
     parser.add_argument('--logs', type=str, default='first_test', help='logs by tensorboardX')
-    parser.add_argument('--local_test', type=str2bool, default=False, help='local test verbose')
+    parser.add_argument('--local_test', type=strBool, default=False, help='local test verbose')
     parser.add_argument('--model_name', type=str, default="dcgan", help='model name for saving')
-    parser.add_argument('--test', type=str2bool, default=False, help='call tester.py')
-    parser.add_argument('--use_visdom', type=str2bool, default=False, help='visualization by visdom')
+    parser.add_argument('--test', type=strBool, default=False, help='call tester.py')
+    parser.add_argument('--use_visdom', type=strBool, default=False, help='visualization by visdom')
     args = parser.parse_args()
     print(args)
 
