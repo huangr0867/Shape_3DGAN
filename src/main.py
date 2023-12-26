@@ -11,7 +11,7 @@ import torch
 from tester import tester
 
 
-def strBool(string):
+def str2bool(string):
     string = string.lower()
     if string in {'yes', 'true', 't', 'y', '1'}:
         return True
@@ -26,11 +26,10 @@ def main():
     parser = argparse.ArgumentParser()
 
     # loggings parameters
-    parser.add_argument('--logs', type=str, default='first_test', help='logs by tensorboardX')
-    parser.add_argument('--local_test', type=strBool, default=False, help='local test verbose')
-    parser.add_argument('--model_name', type=str, default="dcgan", help='model name for saving')
-    parser.add_argument('--test', type=strBool, default=False, help='call tester.py')
-    parser.add_argument('--use_visdom', type=strBool, default=False, help='visualization by visdom')
+    parser.add_argument('--logs', type=str, default='log', help='logs by tensorboardX')
+    parser.add_argument('--local_test', type=str2bool, default=False, help='local test verbose')
+    parser.add_argument('--test', type=str2bool, default=False, help='call tester.py')
+    parser.add_argument('--use_visdom', type=str2bool, default=False, help='visualization by visdom')
     args = parser.parse_args()
     print(args)
 

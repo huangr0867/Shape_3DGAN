@@ -35,14 +35,14 @@ import visdom
 def tester(args):
     print('Evaluation Mode...')
 
-    image_saved_path = constants.DIR_OUT + '/' + args.logs + '/test_outputs'
+    image_saved_path = constants.OUTPUT_PATH + '/' + args.logs + '/test_outputs'
     if not os.path.exists(image_saved_path):
         os.makedirs(image_saved_path)
 
     if args.use_visdom:
         vis = visdom.Visdom()
 
-    save_file_path = constants.DIR_OUT
+    save_file_path = constants.OUTPUT_PATH
     pretrained_file_path_G = save_file_path + '/' + args.logs + '/models/G.pth'
     pretrained_file_path_D = save_file_path + '/' + args.logs + '/models/D.pth'
 

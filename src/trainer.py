@@ -48,18 +48,17 @@ def save_val_log(writer, loss_D, loss_G, itr):
 
 def trainer(args):
     # added for output dir
-    save_file_path = constants.DIR_OUT
+    save_file_path = constants.OUTPUT_PATH
     print(save_file_path)  # ../outputs/dcgan
     if not os.path.exists(save_file_path):
         os.makedirs(save_file_path)
 
     # for using tensorboard
     if args.logs:
-        model_uid = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
-        writer = SummaryWriter(constants.DIR_OUT + '/' + args.logs + '/logs')
+        writer = SummaryWriter(constants.OUTPUT_PATH + '/' + args.logs + '/logs')
 
-        image_saved_path = constants.DIR_OUT + '/' + args.logs + '/images'
-        model_saved_path = constants.DIR_OUT + '/' + args.logs + '/models'
+        image_saved_path = constants.OUTPUT_PATH + '/' + args.logs + '/images'
+        model_saved_path = constants.OUTPUT_PATH + '/' + args.logs + '/models'
 
         if not os.path.exists(image_saved_path):
             os.makedirs(image_saved_path)
@@ -67,7 +66,7 @@ def trainer(args):
             os.makedirs(model_saved_path)
 
     # datset define
-    dsets_path = '/Users/ryanhuang/Desktop/data/sphere_data_r15_pts1000/'
+    dsets_path = constants.DATASET_PATH
 
     print(dsets_path)
 
@@ -78,8 +77,7 @@ def trainer(args):
                                                      num_workers=1)
     # val_dset_loaders = torch.utils.data.DataLoader(val_dsets, batch_size=args.batch_size, shuffle=True, num_workers=1)
 
-    dset_len = {"train": len(train_dsets)}
-    dset_loaders = {"train": train_dset_loaders}
+    dset_len = len(train_dsets)
     # print (dset_len["train"])
 
     # model define
@@ -105,129 +103,115 @@ def trainer(args):
 
         start = time.time()
 
-        for phase in ['train']:
+        D.train()
+        G.train()
+
+        running_loss_G = 0.0
+        running_loss_D = 0.0
+        running_loss_adv_G = 0.0
+
+        phase = 'train'
+
+        for i, X in enumerate(tqdm(train_dset_loaders)):
+
             if phase == 'train':
-                # if args.lrsh:
-                #     D_scheduler.step()
-                D.train()
-                G.train()
-            else:
-                D.eval()
-                G.eval()
+                itr_train += 1
 
-            running_loss_G = 0.0
-            running_loss_D = 0.0
-            running_loss_adv_G = 0.0
+            X = X.to(constants.DEVICE)
 
-            for i, X in enumerate(tqdm(dset_loaders[phase])):
 
-                # if phase == 'val':
-                #     itr_val += 1
+            batch = X.size()[0]
 
-                if phase == 'train':
-                    itr_train += 1
-
-                X = X.to(constants.DEVICE)
-                # print (X)
-                # print (X.size())
-
-                batch = X.size()[0]
-                # print (batch)
-
-                Z = generateZ(args, batch)
+            Z = generateZ(args, batch)
                 # print (Z.size())
 
-                # ============= Train the discriminator =============#
-                d_real = D(X)
+            # ============= Train the discriminator =============#
+            d_real = D(X)
 
-                fake = G(Z)
-                d_fake = D(fake)
+            fake = G(Z)
+            d_fake = D(fake)
 
-                real_labels = torch.ones_like(d_real).to(constants.DEVICE)
-                fake_labels = torch.zeros_like(d_fake).to(constants.DEVICE)
+            real_labels = torch.ones_like(d_real).to(constants.DEVICE)
+            fake_labels = torch.zeros_like(d_fake).to(constants.DEVICE)
 
-                d_real_loss = criterion_D(d_real, real_labels)
+            d_real_loss = criterion_D(d_real, real_labels)
 
-                d_fake_loss = criterion_D(d_fake, fake_labels)
+            d_fake_loss = criterion_D(d_fake, fake_labels)
 
-                d_loss = d_real_loss + d_fake_loss
+            d_loss = d_real_loss + d_fake_loss
 
-                # no deleted
-                d_real_acu = torch.ge(d_real.squeeze(), 0.5).float()
-                d_fake_acu = torch.le(d_fake.squeeze(), 0.5).float()
-                d_total_acu = torch.mean(torch.cat((d_real_acu, d_fake_acu), 0))
+            # no deleted
+            d_real_acu = torch.ge(d_real.squeeze(), 0.5).float()
+            d_fake_acu = torch.le(d_fake.squeeze(), 0.5).float()
+            d_total_acu = torch.mean(torch.cat((d_real_acu, d_fake_acu), 0))
 
-                if d_total_acu < constants.D_THRESHOLD:
-                    D.zero_grad()
-                    d_loss.backward()
-                    D_solver.step()
+            if d_total_acu < constants.D_THRESHOLD:
+                D.zero_grad()
+                d_loss.backward()
+                D_solver.step()
 
-                # =============== Train the generator ===============#
+            # =============== Train the generator ===============#
 
-                Z = generateZ(args, batch)
+            Z = generateZ(args, batch)
 
-                # print (X)
-                fake = G(Z)  # generated fake: 0-1, X: 0/1
-                d_fake = D(fake)
+            fake = G(Z)  # generated fake: 0-1, X: 0/1
+            d_fake = D(fake)
 
-                adv_g_loss = criterion_D(d_fake, real_labels)
-                # print (fake.size(), X.size())
+            adv_g_loss = criterion_D(d_fake, real_labels)
 
 
-                recon_g_loss = criterion_G(fake, X)
+            recon_g_loss = criterion_G(fake, X)
 
-                g_loss = adv_g_loss
+            g_loss = adv_g_loss
 
-                if args.local_test:
-                    print('Iteration-{} , D(x) : {:.4}, D(G(x)) : {:.4}'.format(itr_train, d_loss.item(),
+            if args.local_test:
+                print('Iteration-{} , D(x) : {:.4}, D(G(x)) : {:.4}'.format(itr_train, d_loss.item(),
                                                                                 adv_g_loss.item()))
 
-                D.zero_grad()
-                G.zero_grad()
-                g_loss.backward()
-                G_solver.step()
+            D.zero_grad()
+            G.zero_grad()
+            g_loss.backward()
+            G_solver.step()
 
-                # =============== logging each 10 iterations ===============#
+            # =============== logging each 10 iterations ===============#
 
-                running_loss_G += recon_g_loss.item() * X.size(0)
-                running_loss_D += d_loss.item() * X.size(0)
-                running_loss_adv_G += adv_g_loss.item() * X.size(0)
+            running_loss_G += recon_g_loss.item() * X.size(0)
+            running_loss_D += d_loss.item() * X.size(0)
+            running_loss_adv_G += adv_g_loss.item() * X.size(0)
 
-                if args.logs:
-                    loss_G = {
-                        'adv_loss_G': adv_g_loss,
-                        'recon_loss_G': recon_g_loss,
-                    }
+            if args.logs:
+                loss_G = {
+                    'adv_loss_G': adv_g_loss,
+                    'recon_loss_G': recon_g_loss,
+                }
 
-                    loss_D = {
-                        'adv_real_loss_D': d_real_loss,
-                        'adv_fake_loss_D': d_fake_loss,
-                    }
+                loss_D = {
+                    'adv_real_loss_D': d_real_loss,
+                    'adv_fake_loss_D': d_fake_loss,
+                }
 
-                    # if itr_val % 10 == 0 and phase == 'val':
-                    #     save_val_log(writer, loss_D, loss_G, itr_val)
 
-                    if itr_train % 10 == 0 and phase == 'train':
-                        save_train_log(writer, loss_D, loss_G, itr_train)
+                if itr_train % 10 == 0 and phase == 'train':
+                    save_train_log(writer, loss_D, loss_G, itr_train)
 
-            # =============== each epoch save model or save image ===============#
-            epoch_loss_G = running_loss_G / dset_len[phase]
-            epoch_loss_D = running_loss_D / dset_len[phase]
-            epoch_loss_adv_G = running_loss_adv_G / dset_len[phase]
+        # =============== each epoch save model or save image ===============#
+        epoch_loss_G = running_loss_G / dset_len
+        epoch_loss_D = running_loss_D / dset_len
+        epoch_loss_adv_G = running_loss_adv_G / dset_len
 
-            end = time.time()
-            epoch_time = end - start
+        end = time.time()
+        epoch_time = end - start
 
-            print('Epochs-{} ({}) , D(x) : {:.4}, D(G(x)) : {:.4}'.format(epoch, phase, epoch_loss_D, epoch_loss_adv_G))
-            print('Elapsed Time: {:.4} min'.format(epoch_time / 60.0))
+        print('Epochs-{} ({}) , D(x) : {:.4}, D(G(x)) : {:.4}'.format(epoch, phase, epoch_loss_D, epoch_loss_adv_G))
+        print('Elapsed Time: {:.4} min'.format(epoch_time / 60.0))
 
-            if (epoch + 1) % constants.SAVE_MODEL_ITER == 0:
-                print('model_saved, images_saved...')
-                torch.save(G.state_dict(), model_saved_path + '/G.pth')
-                torch.save(D.state_dict(), model_saved_path + '/D.pth')
+        if (epoch + 1) % constants.SAVE_MODEL_ITER == 0:
+            print('model_saved, images_saved...')
+            torch.save(G.state_dict(), model_saved_path + '/G.pth')
+            torch.save(D.state_dict(), model_saved_path + '/D.pth')
 
-                samples = fake.cpu().data[:8].squeeze().numpy()
-                # print (samples.shape)
-                # image_saved_path = '../images'
+            samples = fake.cpu().data[:8].squeeze().numpy()
 
-                saveGeneratedShape(samples, image_saved_path, epoch)
+            saveGeneratedShape(samples, image_saved_path, epoch)
+
+            

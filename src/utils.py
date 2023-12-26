@@ -67,7 +67,6 @@ class ShapeDataset(data.Dataset):
         data_size = len(self.listdir)
         self.listdir = self.listdir[0:int(data_size)]
         
-        print ('data_size =', len(self.listdir))
         self.args = args
 
     def __getitem__(self, index):
