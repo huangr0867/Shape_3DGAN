@@ -21,44 +21,16 @@ import numpy as np
 import constants
 from tqdm import tqdm
 
-
-def save_train_log(writer, loss_D, loss_G, itr):
-    scalar_info = {}
-    for key, value in loss_G.items():
-        scalar_info['train_loss_G/' + key] = value
-
-    for key, value in loss_D.items():
-        scalar_info['train_loss_D/' + key] = value
-
-    for tag, value in scalar_info.items():
-        writer.add_scalar(tag, value, itr)
-
-
-def save_val_log(writer, loss_D, loss_G, itr):
-    scalar_info = {}
-    for key, value in loss_G.items():
-        scalar_info['val_loss_G/' + key] = value
-
-    for key, value in loss_D.items():
-        scalar_info['val_loss_D/' + key] = value
-
-    for tag, value in scalar_info.items():
-        writer.add_scalar(tag, value, itr)
-
-
 def trainer(args):
     # added for output dir
     save_file_path = constants.OUTPUT_PATH
-    print(save_file_path)  # ../outputs/dcgan
+    print(save_file_path)
     if not os.path.exists(save_file_path):
         os.makedirs(save_file_path)
 
-    # for using tensorboard
-    if args.logs:
-        writer = SummaryWriter(constants.OUTPUT_PATH + '/' + args.logs + '/logs')
-
-        image_saved_path = constants.OUTPUT_PATH + '/' + args.logs + '/images'
-        model_saved_path = constants.OUTPUT_PATH + '/' + args.logs + '/models'
+    if args.log:
+        image_saved_path = constants.OUTPUT_PATH + '/images'
+        model_saved_path = constants.OUTPUT_PATH + '/models'
 
         if not os.path.exists(image_saved_path):
             os.makedirs(image_saved_path)
@@ -71,21 +43,17 @@ def trainer(args):
     print(dsets_path)
 
     train_dsets = ShapeDataset(dsets_path, args, "train")
-    # val_dsets = ShapeNetDataset(dsets_path, args, "val")
 
     train_dset_loaders = torch.utils.data.DataLoader(train_dsets, batch_size=32, shuffle=True,
                                                      num_workers=1)
-    # val_dset_loaders = torch.utils.data.DataLoader(val_dsets, batch_size=args.batch_size, shuffle=True, num_workers=1)
-
+    
     dset_len = len(train_dsets)
-    # print (dset_len["train"])
 
     # model define
     D = Discriminator(args)
     G = Generator(args)
 
     D_solver = optim.Adam(D.parameters(), lr=constants.D_LR, betas=constants.BETA)
-    # D_solver = optim.SGD(D.parameters(), lr=args.d_lr, momentum=0.9)
     G_solver = optim.Adam(G.parameters(), lr=constants.G_LR, betas=constants.BETA)
 
     D.to(constants.DEVICE)
@@ -96,8 +64,8 @@ def trainer(args):
 
     criterion_G = nn.L1Loss()
 
-    itr_val = -1
-    itr_train = -1
+    G_losses = []
+    D_losses = []
 
     for epoch in range(constants.EPOCHS):
 
@@ -110,20 +78,13 @@ def trainer(args):
         running_loss_D = 0.0
         running_loss_adv_G = 0.0
 
-        phase = 'train'
-
-        for i, X in enumerate(tqdm(train_dset_loaders)):
-
-            if phase == 'train':
-                itr_train += 1
+        for train_iter, X in enumerate(tqdm(train_dset_loaders)):
 
             X = X.to(constants.DEVICE)
-
 
             batch = X.size()[0]
 
             Z = generateZ(args, batch)
-                # print (Z.size())
 
             # ============= Train the discriminator =============#
             d_real = D(X)
@@ -140,7 +101,6 @@ def trainer(args):
 
             d_loss = d_real_loss + d_fake_loss
 
-            # no deleted
             d_real_acu = torch.ge(d_real.squeeze(), 0.5).float()
             d_fake_acu = torch.le(d_fake.squeeze(), 0.5).float()
             d_total_acu = torch.mean(torch.cat((d_real_acu, d_fake_acu), 0))
@@ -154,19 +114,14 @@ def trainer(args):
 
             Z = generateZ(args, batch)
 
-            fake = G(Z)  # generated fake: 0-1, X: 0/1
+            fake = G(Z)
             d_fake = D(fake)
 
             adv_g_loss = criterion_D(d_fake, real_labels)
 
-
             recon_g_loss = criterion_G(fake, X)
 
             g_loss = adv_g_loss
-
-            if args.local_test:
-                print('Iteration-{} , D(x) : {:.4}, D(G(x)) : {:.4}'.format(itr_train, d_loss.item(),
-                                                                                adv_g_loss.item()))
 
             D.zero_grad()
             G.zero_grad()
@@ -175,24 +130,9 @@ def trainer(args):
 
             # =============== logging each 10 iterations ===============#
 
-            running_loss_G += recon_g_loss.item() * X.size(0)
-            running_loss_D += d_loss.item() * X.size(0)
-            running_loss_adv_G += adv_g_loss.item() * X.size(0)
+            G_losses.append(g_loss.item())
+            D_losses.append(d_loss.item())
 
-            if args.logs:
-                loss_G = {
-                    'adv_loss_G': adv_g_loss,
-                    'recon_loss_G': recon_g_loss,
-                }
-
-                loss_D = {
-                    'adv_real_loss_D': d_real_loss,
-                    'adv_fake_loss_D': d_fake_loss,
-                }
-
-
-                if itr_train % 10 == 0 and phase == 'train':
-                    save_train_log(writer, loss_D, loss_G, itr_train)
 
         # =============== each epoch save model or save image ===============#
         epoch_loss_G = running_loss_G / dset_len
@@ -201,6 +141,7 @@ def trainer(args):
 
         end = time.time()
         epoch_time = end - start
+        phase = 'train'
 
         print('Epochs-{} ({}) , D(x) : {:.4}, D(G(x)) : {:.4}'.format(epoch, phase, epoch_loss_D, epoch_loss_adv_G))
         print('Elapsed Time: {:.4} min'.format(epoch_time / 60.0))
@@ -213,5 +154,18 @@ def trainer(args):
             samples = fake.cpu().data[:8].squeeze().numpy()
 
             saveGeneratedShape(samples, image_saved_path, epoch)
+
+    loss_path = constants.OUTPUT_PATH + '/loss'
+    if not os.path.exists(loss_path):
+        os.makedirs(loss_path)
+    plt.figure(figsize=(10,5))
+    plt.title("Generator and Discriminator Loss During Training")
+    plt.plot(G_losses,label="G")
+    plt.plot(D_losses,label="D")
+    plt.xlabel("iterations")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.savefig(loss_path + '/loss_during_training.png', bbox_inches='tight')
+    plt.close()
 
             
