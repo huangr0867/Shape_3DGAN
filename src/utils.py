@@ -32,17 +32,6 @@ def getVoxelFromArray(path, cube_len=32):
     voxels = np.pad(voxels, (1, 1), 'constant', constant_values=(0, 0)) # 32 x 32 x 32
     return voxels
 
-
-def getVFByMarchingCubes(voxels, threshold=0.5):
-    v, f = sk.marching_cubes_classic(voxels, level=threshold)
-    return v, f
-
-
-def plotVoxelVisdom(voxels, visdom, title):
-    v, f = getVFByMarchingCubes(voxels)
-    visdom.mesh(X=v, Y=f, opts=dict(opacity=0.5, title=title))
-
-
 def saveGeneratedShape(voxels, path, iteration):
     voxels = voxels[:1].__ge__(0.5)
     fig = plt.figure(figsize=(32, 16))
