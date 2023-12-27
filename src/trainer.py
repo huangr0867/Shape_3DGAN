@@ -1,9 +1,3 @@
-'''
-trainer.py
-
-Train 3dgan models
-'''
-
 import torch
 from torch import optim
 from torch import nn
@@ -22,12 +16,23 @@ import constants
 from tqdm import tqdm
 
 def trainer(args):
-    # added for output dir
+    """
+    Main function for training the Generative Adversarial Network (GAN).
+
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+
+    Returns:
+        None
+    """
+    
+    # Set output directory
     save_file_path = constants.OUTPUT_PATH
-    print(save_file_path)
+    print("output directory: " + save_file_path)
     if not os.path.exists(save_file_path):
         os.makedirs(save_file_path)
 
+    # Set up logging directories
     if args.log:
         image_saved_path = constants.OUTPUT_PATH + '/images'
         model_saved_path = constants.OUTPUT_PATH + '/models'
@@ -37,19 +42,15 @@ def trainer(args):
         if not os.path.exists(model_saved_path):
             os.makedirs(model_saved_path)
 
-    # datset define
+    # Dataset
     dsets_path = constants.DATASET_PATH
-
-    print(dsets_path)
-
+    print("dataset directory: " + dsets_path)
     train_dsets = ShapeDataset(dsets_path, args, "train")
-
     train_dset_loaders = torch.utils.data.DataLoader(train_dsets, batch_size=32, shuffle=True,
                                                      num_workers=1)
-    
     dset_len = len(train_dsets)
 
-    # model define
+    # Model
     D = Discriminator(args)
     G = Generator(args)
 
@@ -59,7 +60,6 @@ def trainer(args):
     D.to(constants.DEVICE)
     G.to(constants.DEVICE)
 
-    # criterion_D = nn.BCELoss()
     criterion_D = nn.MSELoss()
 
     criterion_G = nn.L1Loss()
@@ -86,7 +86,7 @@ def trainer(args):
 
             Z = generateZ(args, batch)
 
-            # ============= Train the discriminator =============#
+            # Train the discriminator
             d_real = D(X)
 
             fake = G(Z)
@@ -110,8 +110,7 @@ def trainer(args):
                 d_loss.backward()
                 D_solver.step()
 
-            # =============== Train the generator ===============#
-
+            # Train the generator
             Z = generateZ(args, batch)
 
             fake = G(Z)
@@ -128,13 +127,12 @@ def trainer(args):
             g_loss.backward()
             G_solver.step()
 
-            # =============== logging each 10 iterations ===============#
-
+            # Logging losses
             G_losses.append(g_loss.item())
             D_losses.append(d_loss.item())
 
 
-        # =============== each epoch save model or save image ===============#
+        # Save model or save image for each epoch
         epoch_loss_G = running_loss_G / dset_len
         epoch_loss_D = running_loss_D / dset_len
         epoch_loss_adv_G = running_loss_adv_G / dset_len
@@ -155,6 +153,7 @@ def trainer(args):
 
             saveGeneratedShape(samples, image_saved_path, epoch)
 
+    # Save the losses plot
     loss_path = constants.OUTPUT_PATH + '/loss'
     if not os.path.exists(loss_path):
         os.makedirs(loss_path)

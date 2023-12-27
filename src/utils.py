@@ -1,11 +1,3 @@
-
-'''
-utils.py
-
-Some utility functions
-
-'''
-
 import scipy.ndimage as nd
 import scipy.io as io
 import matplotlib
@@ -26,13 +18,32 @@ import os
 import pickle
 
 
-
 def getVoxelFromArray(path, cube_len=32):
+    """
+    Load voxel data from a file and pad it to the specified cube size.
+
+    Args:
+        path (str): Path to the file containing voxel data.
+        cube_len (int): Desired cube size.
+
+    Returns:
+        np.ndarray: Padded voxel data.
+    """
+
     voxels = np.load(path, allow_pickle=True)['a'] # 30 x 30 x 30
     voxels = np.pad(voxels, (1, 1), 'constant', constant_values=(0, 0)) # 32 x 32 x 32
     return voxels
 
 def saveGeneratedShape(voxels, path, iteration):
+    """
+    Save a 3D scatter plot of generated voxel shapes.
+
+    Args:
+        voxels (np.ndarray): Generated voxel data.
+        path (str): Path to save the visualization.
+        iteration (int): Iteration number for file naming.
+    """
+    
     voxels = voxels[:1].__ge__(0.5)
     fig = plt.figure(figsize=(32, 16))
     gs = gridspec.GridSpec(1, 1)
@@ -48,6 +59,15 @@ def saveGeneratedShape(voxels, path, iteration):
 
 class ShapeDataset(data.Dataset):
     def __init__(self, root, args, train_or_val="train"):
+        """
+        Dataset class for loading voxel data.
+
+        Args:
+            root (str): Root directory containing voxel data files.
+            args (argparse.Namespace): Command-line arguments.
+            train_or_val (str): Specifies whether the dataset is for training or validation.
+        """
+
         self.root = root
         self.listdir = os.listdir(self.root)
         if '.DS_Store' in self.listdir:
@@ -59,15 +79,43 @@ class ShapeDataset(data.Dataset):
         self.args = args
 
     def __getitem__(self, index):
+        """
+        Load voxel data for a given index.
+
+        Args:
+            index (int): Index of the voxel data file.
+
+        Returns:
+            torch.FloatTensor: Loaded voxel data as a PyTorch FloatTensor.
+        """
+
         with open(self.root + self.listdir[index], "rb") as f:
             volume = np.asarray(getVoxelFromArray(f, constants.CUBE_LEN), dtype=np.float32)
         return torch.FloatTensor(volume)
 
     def __len__(self):
+        """
+        Return the number of items in the dataset.
+
+        Returns:
+            int: Number of items in the dataset.
+        """
+
         return len(self.listdir)
 
 
 def generateZ(args, batch):
+    """
+    Generate random noise vectors for the generator.
+
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+        batch (int): Number of noise vectors to generate.
+
+    Returns:
+        torch.Tensor: Generated noise vectors.
+    """
+
     if constants.Z_DIS == "norm":
         Z = torch.Tensor(batch, constants.Z_DIM).normal_(0, 0.33).to(constants.DEVICE)
     elif constants.Z_DIS == "uni":

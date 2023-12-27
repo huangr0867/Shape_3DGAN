@@ -2,19 +2,15 @@ import torch
 import torch.nn as nn
 import constants
 
-'''
-
-model.py
-
-Define our GAN model
-
-The cube_len is 32x32x32, and the maximum number of feature map is 256, 
-so the results may be inconsistent with the paper
-
-'''
-
 class Generator(nn.Module):
     def __init__(self, args):
+        """
+        Generator class for the GAN model.
+
+        Args:
+            args (argparse.Namespace): Command-line arguments.
+        """
+        
         super(Generator, self).__init__()
         self.args = args
         self.cube_len = constants.CUBE_LEN
@@ -41,7 +37,6 @@ class Generator(nn.Module):
 
             nn.ConvTranspose3d(self.f_dim, 1, kernel_size=4, stride=2, bias=self.bias, padding=(1,1,1)),
             nn.Sigmoid()
-
         )
         
 
@@ -54,6 +49,13 @@ class Generator(nn.Module):
 
 class Discriminator(nn.Module):
     def __init__(self, args):
+        """
+        Discriminator class for the GAN model.
+
+        Args:
+            args (argparse.Namespace): Command-line arguments.
+        """
+
         super(Discriminator, self).__init__()
         self.args = args
         self.cube_len = constants.CUBE_LEN
