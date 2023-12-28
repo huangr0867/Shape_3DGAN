@@ -26,10 +26,10 @@ python main.py --pretrained=true
 
 ## Results
 This is an example sphere generated for a sphere with 500 points:
-![500pts_result](data/generated/pretrained_generated/pretrained_generated.png)
+![500pts_result](data/generated/pretrained_generated/pretrained_generated.png =50x50)
 
 This is an example sphere generated for a sphere with 1000 points:
-![1000pts_result](results/299.png)
+![1000pts_result](results/299.png =50x50)
 
 ## Future Directions
 * Adaptation for different geometric shapes and even more random shapes like biological structures
