@@ -1,6 +1,5 @@
 import torch
 
-EPOCHS = 300
 G_LR = 0.0025 # generator learning rate
 D_LR = 0.00001 # discrminator learning rate
 BETA = (0.5, 0.999)

@@ -45,7 +45,7 @@ def trainer(args):
     dsets_path = constants.DATASET_PATH
     print("dataset directory: " + dsets_path)
     train_dsets = ShapeDataset(dsets_path, args, "train")
-    train_dset_loaders = torch.utils.data.DataLoader(train_dsets, batch_size=32, shuffle=True,
+    train_dset_loaders = torch.utils.data.DataLoader(train_dsets, batch_size=args.batch_size, shuffle=True,
                                                      num_workers=1)
     dset_len = len(train_dsets)
 
@@ -66,7 +66,7 @@ def trainer(args):
     G_losses = []
     D_losses = []
 
-    for epoch in range(constants.EPOCHS):
+    for epoch in range(args.epochs):
 
         start = time.time()
 

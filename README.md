@@ -13,8 +13,12 @@ Note: dataset and output path should be changed accordingly in ```model/constant
 ```python
 python main.py
 ```
-* The model will be trained for 300 epochs (specifications can be changed in ```model/constants.py```, specifics are found in ```model/trainer.py```)
-* Trained model and images of generated spheres will be outputed in a separate data file (example output found in ```data/generated```)
+* The model will be trained for 300 epochs and a batch size of 32. To change the specifications, run:
+```python
+python main.py --epochs=[EPOCH] --batch_size=[BATCH_SIZE]
+```
+with repaced values for [EPOCH] and [BATCH_SIZE]
+* Trained model and images of generated spheres will be outputed in a separate data file (example output found in ```data/generated```).
 
 ## Pre-trained Model
 * Pretrained generator and discriminators are found in ```data/generated/models```
