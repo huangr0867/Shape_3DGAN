@@ -26,7 +26,7 @@ with replaced values for [EPOCH] and [BATCH_SIZE].
 ```
 python main.py --pretrained=true
 ```
-* Specific are found in ```model/generate.py```
+* Specifics are found in ```model/generate.py```
 
 ## Results
 This is an example sphere generated for a sphere with 500 points:
