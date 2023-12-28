@@ -29,11 +29,11 @@ python main.py --pretrained=true
 * Specifics are found in ```model/generate.py```
 
 ## Results
-This is an example sphere generated for a sphere with 500 points:
+This is an example sphere generated for a sphere with 500 points (after 300 epochs):
 
 <img src="data/generated/pretrained_generated/pretrained_generated.png" alt="500pts_result" width="500"/>
 
-This is an example sphere generated for a sphere with 1000 points:
+This is an example sphere generated for a sphere with 1000 points (after 300 epochs):
 
 <img src="results/299.png" alt="1000pts_result" width="500"/>
 
@@ -48,5 +48,6 @@ This is an example sphere generated for a sphere with 1000 points (after 500 epo
 ## References
 * Pytorch implemenation based on the repo: [3DGAN-Pytorch](https://github.com/rimchang/3DGAN-Pytorch/tree/master)
 * Pytorch usage reference: [DCGAN Pytorch](https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html)
+* Original paper: [https://arxiv.org/abs/1610.07584](https://arxiv.org/abs/1610.07584)
 
 
