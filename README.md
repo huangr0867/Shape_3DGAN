@@ -18,7 +18,7 @@ python main.py
 
 ## Pre-trained Model
 * Pretrained generator and discriminators are found in ```data/generated/models```
-* To use pretrained model, run
+* To use pretrained model, run `cd model` and then:
 ```
 python main.py --pretrained=true
 ```
@@ -32,6 +32,10 @@ This is an example sphere generated for a sphere with 500 points:
 This is an example sphere generated for a sphere with 1000 points:
 
 <img src="results/299.png" alt="1000pts_result" width="500"/>
+
+This is an example sphere generated for a sphere with 1000 points (after 500 epochs):
+
+<img src="results/499.png" alt="1000pts_result_500" width="500"/>
 
 ## Future Directions
 * Adaptation for different geometric shapes and even more random shapes like biological structures
