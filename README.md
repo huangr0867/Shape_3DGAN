@@ -17,7 +17,7 @@ python main.py
 ```python
 python main.py --epochs=[EPOCH] --batch_size=[BATCH_SIZE]
 ```
-with repaced values for [EPOCH] and [BATCH_SIZE]
+with replaced values for [EPOCH] and [BATCH_SIZE].
 * Trained model and images of generated spheres will be outputed in a separate data file (example output found in ```data/generated```).
 
 ## Pre-trained Model
@@ -44,5 +44,9 @@ This is an example sphere generated for a sphere with 1000 points (after 500 epo
 ## Future Directions
 * Adaptation for different geometric shapes and even more random shapes like biological structures
 * Generation of shapes with different sizes in the dataset
+
+## References
+* Pytorch implemenation based on the repo: [3DGAN-Pytorch](https://github.com/rimchang/3DGAN-Pytorch/tree/master)
+* Pytorch usage reference: [DCGAN Pytorch](https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html)
 
 
