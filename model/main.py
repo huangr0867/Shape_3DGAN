@@ -1,5 +1,6 @@
 import argparse
 from trainer import trainer
+from generate import generate_from_pretrained
 import torch
 
 
@@ -36,13 +37,17 @@ def main():
     # Logging parameters
     parser.add_argument('--log', type=str2bool, default=True, help='log training epochs')
     parser.add_argument('--loss', type=str2bool, default=True, help='record losses')
+    parser.add_argument('--pretrained', type=str2bool, default=False, help='record losses')
 
     # Parse command-line arguments
     args = parser.parse_args()
     print(args)
 
     # Run the training program with the parsed arguments
-    trainer(args)
+    if args.pretrained:
+        generate_from_pretrained(args)
+    else:
+        trainer(args)
 
 
 if __name__ == '__main__':

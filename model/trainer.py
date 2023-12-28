@@ -6,7 +6,6 @@ import os
 
 from model import Generator, Discriminator
 
-# added
 import datetime
 import time
 from tensorboardX import SummaryWriter
