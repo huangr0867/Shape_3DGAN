@@ -31,7 +31,7 @@ python main.py --pretrained=true
 ## Results
 This is an example sphere generated for a sphere with 500 points (after 500 epochs):
 
-<img src="results/299.png" alt="1000pts_result" width="500"/>
+<img src="results/499 copy.png" alt="1000pts_result" width="500"/>
 
 This is an example sphere generated for a sphere with 1000 points (after 500 epochs):
 
