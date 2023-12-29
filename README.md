@@ -3,6 +3,7 @@
 ## Introduction
 * Aim: Create a dataset of 3D shapes (spheres) and train a neural network to generate them.
 * Generative Architecture: 3DCNN based on the paper: [https://arxiv.org/abs/1610.07584](https://arxiv.org/abs/1610.07584); done using the pytorch implementation
+* More info outlined in write_up.pdf
 
 ## Generating Dataset
 The dataset was made by randomly generating point clouds of spheres. The code/procedure for the dataset generation can be found in ```shape_procedure/generate3dShapes.ipynb```. Two sample datasets with 1000 spheres are provided: point clouds with 500 points and with 1000 points (found in ```shape_data/sphere```).
