@@ -16,6 +16,7 @@ from torch.autograd import Variable
 import torch
 import os
 import pickle
+import math
 
 
 def getVoxelFromArray(path, cube_len=32):
@@ -55,6 +56,8 @@ def saveGeneratedShape(voxels, path, iteration):
 
     plt.savefig(path + '/{}.png'.format(str(iteration).zfill(3)), bbox_inches='tight')
     plt.close()
+
+    return voxels[0].nonzero()
 
 
 class ShapeDataset(data.Dataset):
@@ -117,10 +120,13 @@ def generateZ(args, batch):
     """
 
     if constants.Z_DIS == "norm":
-        Z = torch.Tensor(batch, constants.Z_DIM).normal_(0, 0.33).to(constants.DEVICE)
+        Z = torch.Tensor(batch, constants.Z_DIM).normal_(0, 1).to(constants.DEVICE)
     elif constants.Z_DIS == "uni":
         Z = torch.randn(batch, constants.Z_DIM).to(constants.DEVICE).to(constants.DEVICE)
     else:
         print("z_dist is not normal or uniform")
 
     return Z
+
+def distance(x, y, z, center):
+    return math.sqrt((center[0]-x)**2 + (center[1]-y)**2 +  (center[2]-z)**2)

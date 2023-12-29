@@ -32,8 +32,6 @@ def generate_from_pretrained(args):
         G.load_state_dict(torch.load(pretrained_file_path_G))
         D.load_state_dict(torch.load(pretrained_file_path_D, map_location={'cuda:0': 'cpu'}))
 
-    print('visualizing model')
-
     G.to(constants.DEVICE)
     D.to(constants.DEVICE)
     G.eval()
@@ -45,4 +43,26 @@ def generate_from_pretrained(args):
     samples = fake.unsqueeze(dim=0).detach().cpu().numpy()
     y_prob = D(fake)
     y_real = torch.ones_like(y_prob)
-    saveGeneratedShape(samples, image_saved_path, 'pretrained_generated')
+    xi, yi, zi = saveGeneratedShape(samples, image_saved_path, 'pretrained_generated')
+    
+    total_dist = 0
+    for i in range(len(xi)):
+        distance_from_center = distance(xi[i], yi[i], zi[i], (15,15,15))
+        total_dist += distance_from_center
+    
+    avg_radius = total_dist/len(xi)
+    print('average radius:' + str(avg_radius))
+
+    radius_path = os.path.join(constants.OUTPUT_PATH, 'avg_radius')
+
+    # Ensure the directory exists
+    os.makedirs(radius_path, exist_ok=True)
+
+    rmse_file_path = os.path.join(radius_path, 'avg_radius.txt')
+
+    # Write or append the RMSE value to the file
+    with open(rmse_file_path, 'a') as f:
+        if os.path.getsize(rmse_file_path) == 0:
+            f.write(str(avg_radius))
+        else:
+            f.write('\n' + str(avg_radius))

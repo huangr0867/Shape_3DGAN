@@ -126,8 +126,11 @@ def trainer(args):
             g_loss.backward()
             G_solver.step()
 
-            # Logging losses
-            G_losses.append(g_loss.item())
+            running_loss_G += recon_g_loss.item() * X.size(0)
+            running_loss_D += d_loss.item() * X.size(0)
+            running_loss_adv_G += adv_g_loss.item() * X.size(0)
+
+            G_losses.append(running_loss_adv_G.item())
             D_losses.append(d_loss.item())
 
 

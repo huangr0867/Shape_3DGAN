@@ -13,7 +13,7 @@ Note: dataset and output path should be changed accordingly in ```model/constant
 ```python
 python main.py
 ```
-* The model will be trained for 300 epochs and a batch size of 32. To change the specifications, run:
+* The model will be trained for 500 epochs and a batch size of 32. To change the specifications, run:
 ```python
 python main.py --epochs=[EPOCH] --batch_size=[BATCH_SIZE]
 ```
@@ -29,11 +29,7 @@ python main.py --pretrained=true
 * Specifics are found in ```model/generate.py```
 
 ## Results
-This is an example sphere generated for a sphere with 500 points (after 300 epochs):
-
-<img src="data/generated/pretrained_generated/pretrained_generated.png" alt="500pts_result" width="500"/>
-
-This is an example sphere generated for a sphere with 1000 points (after 300 epochs):
+This is an example sphere generated for a sphere with 500 points (after 500 epochs):
 
 <img src="results/299.png" alt="1000pts_result" width="500"/>
 
