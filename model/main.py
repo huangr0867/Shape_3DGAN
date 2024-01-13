@@ -38,8 +38,8 @@ def main():
     parser.add_argument('--log', type=str2bool, default=True, help='log training epochs')
     parser.add_argument('--loss', type=str2bool, default=True, help='record losses')
     parser.add_argument('--pretrained', type=str2bool, default=False, help='record losses')
-    parser.add_argument('--batch_size', type=float, default=32, help='batch size during training')
-    parser.add_argument('--epochs', type=float, default=500, help='training epochs')
+    parser.add_argument('--batch_size', type=float, default=2, help='batch size during training')
+    parser.add_argument('--epochs', type=float, default=1000, help='training epochs')
 
     # Parse command-line arguments
     args = parser.parse_args()

@@ -37,32 +37,36 @@ def generate_from_pretrained(args):
     G.eval()
     D.eval()
 
-    z = generateZ(args, 1)
+    N = 200
 
-    fake = G(z)
-    samples = fake.unsqueeze(dim=0).detach().cpu().numpy()
-    y_prob = D(fake)
-    y_real = torch.ones_like(y_prob)
-    xi, yi, zi = saveGeneratedShape(samples, image_saved_path, 'pretrained_generated')
-    
-    total_dist = 0
-    for i in range(len(xi)):
-        distance_from_center = distance(xi[i], yi[i], zi[i], (15,15,15))
-        total_dist += distance_from_center
-    
-    avg_radius = total_dist/len(xi)
-    print('average radius:' + str(avg_radius))
+    for i in range(N):
 
-    radius_path = os.path.join(constants.OUTPUT_PATH, 'avg_radius')
+        z = generateZ(args, 1)
 
-    # Ensure the directory exists
-    os.makedirs(radius_path, exist_ok=True)
+        fake = G(z)
+        samples = fake.unsqueeze(dim=0).detach().cpu().numpy()
+        y_prob = D(fake)
+        y_real = torch.ones_like(y_prob)
+        saveGeneratedShapeVoxel(samples, image_saved_path, 'pretrained_generated' + str(i))
+        
+        # total_dist = 0
+        # for i in range(len(xi)):
+        #     distance_from_center = distance(xi[i], yi[i], zi[i], (15,15,15))
+        #     total_dist += distance_from_center
+        
+        # avg_radius = total_dist/len(xi)
+        # print('average radius:' + str(avg_radius))
 
-    rmse_file_path = os.path.join(radius_path, 'avg_radius.txt')
+        # radius_path = os.path.join(constants.OUTPUT_PATH, 'avg_radius')
 
-    # Write or append the RMSE value to the file
-    with open(rmse_file_path, 'a') as f:
-        if os.path.getsize(rmse_file_path) == 0:
-            f.write(str(avg_radius))
-        else:
-            f.write('\n' + str(avg_radius))
+        # # Ensure the directory exists
+        # os.makedirs(radius_path, exist_ok=True)
+
+        # rmse_file_path = os.path.join(radius_path, 'avg_radius.txt')
+
+        # # Write or append the RMSE value to the file
+        # with open(rmse_file_path, 'a') as f:
+        #     if os.path.getsize(rmse_file_path) == 0:
+        #         f.write(str(avg_radius))
+        #     else:
+        #         f.write('\n' + str(avg_radius))

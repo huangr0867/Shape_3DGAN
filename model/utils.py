@@ -35,6 +35,28 @@ def getVoxelFromArray(path, cube_len=32):
     voxels = np.pad(voxels, (1, 1), 'constant', constant_values=(0, 0)) # 32 x 32 x 32
     return voxels
 
+def saveGeneratedShapeVoxel(voxels, path, iteration):
+    voxels = voxels[:8].__ge__(0.5)
+    fig = plt.figure(figsize=(32, 16))
+    gs = gridspec.GridSpec(2, 4)
+    gs.update(wspace=0.05, hspace=0.05)
+
+    for i, sample in enumerate(voxels):
+        ax = plt.subplot(gs[i], projection='3d')
+        ax.voxels(voxels[i], facecolors='blue', edgecolor='k')
+
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_aspect('equal')
+        # ax.set_xticklabels([])
+        # ax.set_yticklabels([])
+        # ax.set_aspect('equal')
+    # print (path + '/{}.png'.format(str(iteration).zfill(3)))
+    plt.savefig(path + '/{}.png'.format(str(iteration).zfill(3)), bbox_inches='tight')
+    plt.close()
+                            
+
 def saveGeneratedShape(voxels, path, iteration):
     """
     Save a 3D scatter plot of generated voxel shapes.
@@ -44,18 +66,58 @@ def saveGeneratedShape(voxels, path, iteration):
         path (str): Path to save the visualization.
         iteration (int): Iteration number for file naming.
     """
-    
-    voxels = voxels[:1].__ge__(0.5)
+    voxels = voxels[:8].__ge__(0.5)
+    np.savez_compressed(path + '/' + str(iteration), a=voxels[0])
     fig = plt.figure(figsize=(32, 16))
-    gs = gridspec.GridSpec(1, 1)
+    gs = gridspec.GridSpec(2, 4)
     gs.update(wspace=0.05, hspace=0.05)
-    x, y, z = voxels[0].nonzero()
-    ax = plt.subplot(gs[0], projection='3d')
-    ax.set_aspect('equal')
-    ax.scatter(x, y, z, zdir='z', c='blue')
 
+    for i, sample in enumerate(voxels):
+        x, y, z = sample.nonzero()
+        ax = plt.subplot(gs[i], projection='3d')
+        ax.set_aspect('equal')
+        ax.scatter(x, y, z, zdir='z', c='red')
+
+        ax.set_xlim([0, 32])
+        ax.set_ylim([0, 32])
+        ax.set_zlim([0, 32])
+        # ax.set_xticklabels([])
+        # ax.set_yticklabels([])
+        # ax.set_aspect('equal')
+    # print (path + '/{}.png'.format(str(iteration).zfill(3)))
     plt.savefig(path + '/{}.png'.format(str(iteration).zfill(3)), bbox_inches='tight')
     plt.close()
+    # voxels = voxels[:8].__ge__(0.5)
+    # fig = plt.figure(figsize=(32, 16))
+    # gs = gridspec.GridSpec(2, 4)
+    # gs.update(wspace=0.05, hspace=0.05)
+
+    # for i, sample in enumerate(voxels):
+    #     ax = plt.subplot(gs[i], projection='3d')
+    #     ax.voxels(voxels[i], facecolors='blue', edgecolor='k')
+
+    #     ax.set_xlabel('X')
+    #     ax.set_ylabel('Y')
+    #     ax.set_zlabel('Z')
+    #     ax.set_aspect('equal')
+    #     # ax.set_xticklabels([])
+    #     # ax.set_yticklabels([])
+    #     # ax.set_aspect('equal')
+    # # print (path + '/{}.png'.format(str(iteration).zfill(3)))
+    # plt.savefig(path + '/{}.png'.format(str(iteration).zfill(3)), bbox_inches='tight')
+    # plt.close()
+
+    # voxels = voxels[:1].__ge__(0.5)
+    # fig = plt.figure(figsize=(32, 16))
+    # gs = gridspec.GridSpec(1, 1)
+    # gs.update(wspace=0.05, hspace=0.05)
+    # x, y, z = voxels[0].nonzero()
+    # ax = plt.subplot(gs[0], projection='3d')
+    # ax.set_aspect('equal')
+    # ax.scatter(x, y, z, zdir='z', c='blue')
+
+    # plt.savefig(path + '/{}.png'.format(str(iteration).zfill(3)), bbox_inches='tight')
+    # plt.close()
 
     return voxels[0].nonzero()
 
