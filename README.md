@@ -34,9 +34,9 @@ python main.py --pretrained=true
 ## Results
 These are some example generated spheres:
 
-<img src="data/generated/pretrained_generated/pretrained_generated0.png.png" alt="1000pts_result" width="500"/>
+<img src="data/generated/pretrained_generated/pretrained_generated0.png" alt="1000pts_result" width="500"/>
 
-<img src="data/generated/pretrained_generated/pretrained_generated8.png.png" alt="1000pts_result" width="500"/>
+<img src="data/generated/pretrained_generated/pretrained_generated8.png" alt="1000pts_result" width="500"/>
 
 ## Future Directions
 * Adaptation for different geometric shapes and even more random shapes like biological structures
