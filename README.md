@@ -8,13 +8,15 @@
 ## Generating Dataset
 The dataset was made by randomly generating point clouds of spheres. The code/procedure for the dataset generation can be found in ```shape_procedure/generate3dShapes.ipynb```. Two sample datasets with 1000 spheres are provided: point clouds with 500 points and with 1000 points (found in ```shape_data/sphere```).
 
+For a filled in set of spheres, it can be found in the `filled` folder in `shape_data`.
+
 ## Training Model
 Note: dataset and output path should be changed accordingly in ```model/constants.py```
 * In the terminal, run `cd model` and then:
 ```python
 python main.py
 ```
-* The model will be trained for 500 epochs and a batch size of 32. To change the specifications, run:
+* The model will be trained for 1000 epochs and a batch size of 2. To change the specifications, run:
 ```python
 python main.py --epochs=[EPOCH] --batch_size=[BATCH_SIZE]
 ```
@@ -30,13 +32,11 @@ python main.py --pretrained=true
 * Specifics are found in ```model/generate.py```
 
 ## Results
-This is an example sphere generated for a sphere with 500 points (after 500 epochs):
+These are some example generated spheres:
 
-<img src="results/499 copy.png" alt="1000pts_result" width="500"/>
+<img src="data/generated/pretrained_generated/pretrained_generated0.png.png" alt="1000pts_result" width="500"/>
 
-This is an example sphere generated for a sphere with 1000 points (after 500 epochs):
-
-<img src="results/499.png" alt="1000pts_result_500" width="500"/>
+<img src="data/generated/pretrained_generated/pretrained_generated8.png.png" alt="1000pts_result" width="500"/>
 
 ## Future Directions
 * Adaptation for different geometric shapes and even more random shapes like biological structures
